@@ -5,8 +5,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Count
 
-from .models import Inventory, InventoryGroup
-from .serializers import InventorySerializer, InventoryGroupSerializer
+from .models import Inventory, InventoryGroup, Shop
+from .serializers import (
+    InventorySerializer, 
+    InventoryGroupSerializer,
+    ShopSerializer
+)
 from core.custom_method import IsAuthenticatedCustom
 from core.utils import CustomPagination, get_query
 
@@ -76,3 +80,36 @@ class InventoryGroupView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         request.data.update({"created_by_id":request.user.id})
         return super().create(request, *args, **kwargs)
+    
+
+class ShopView(ModelViewSet):
+    queryset = Shop.objects.select_related('created_by')
+    serializer_class = ShopSerializer
+    permission_classes = (IsAuthenticatedCustom, )
+    pagination_class = (CustomPagination, )
+    
+    def get_queryset(self):
+        if self.request.method.lower() != "get":
+            return self.queryset
+        
+        data = self.request.query_params.dict()
+        data.pop("page", None)
+        keyword = data.pop("keyword", None)
+        
+        results = self.queryset(**data)
+        if keyword:
+            search_fields = (
+                'created_by__fullname',
+                'created_by__email',
+                'name',
+            )
+            query = get_query(keyword, search_fields)
+            results = results.filter(query)
+        
+        return results
+    
+    
+    def create(self, request, *args, **kwargs):
+        request.data.update({"created_by_id":request.user.id})
+        return super().create(request, *args, **kwargs)
+    
