@@ -1,5 +1,3 @@
-from operator import inv
-from black import maybe_install_uvloop
 from rest_framework import serializers
 
 from .models import ( 
@@ -41,6 +39,10 @@ class InventorySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class InventoryWithSumSerializer(InventorySerializer):
+    sum_of_item = serializers.IntegerField()
+
+
 class ShopSerializer(serializers.ModelSerializer):
     created_by = CustomUserSerializer(read_only=True)
     created_by_id = serializers.CharField(write_only=True, required=False)
@@ -52,6 +54,12 @@ class ShopSerializer(serializers.ModelSerializer):
         fields = "__all__"
         
 
+class ShopWithAmountSerializer(ShopSerializer):
+    amount_total       = serializers.FloatField()
+    month              = serializers.CharField(required=False)
+    
+    
+    
 class InvoiceItemSerializer(serializers.ModelSerializer):
     invoice = serializers.CharField(read_only=True)
     invoice_id = serializers.CharField(write_only=True)
