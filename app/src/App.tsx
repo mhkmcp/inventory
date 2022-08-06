@@ -1,10 +1,12 @@
 import {FC} from 'react'
+import 'antd/dist/antd.css'; 
 
-const App:FC = ({name, age}:any) => {
+import Router from './router'
+import './style.scss';
+
+const App:FC = () => {
     return (
-        <div>
-            Hello App
-        </div>
+       <Router />
     )
 }
 
